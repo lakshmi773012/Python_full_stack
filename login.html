@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registration Form</title>
+</head>
+
+<body>
+
+<h2>Login successfull!</h2>
+<form id="loginform">
+  <label>User Name:</label>
+    <input type="text" id="username" name="username">
+    <br><br>
+    <label>Password:</label>
+    <input type="password" id="password" name="password">
+    <br><br>
+    <button type="submit" value="register" >login</button>
+    <button type="reset" value="register" >reset</button>
+ 
+    <p id="message"></p>
+
+<script>
+  let params=new URLSearchParams(window.location.search)
+  let registeredusername=params.get("username")
+   let registeredpassword=params.get("password")
+
+  
+  document.getElementById("loginform").addEventListener("submit",
+    function(event){event.preventDefault()
+      let username=(document.getElementById("username").value)
+      let password=(document.getElementById("password").value)
+      if(username===registeredusername&&password===registeredpassword)
+    {
+      document.getElementById("message").innerHTML=username+"   login successfully"
+    }
+      else
+    {
+      document.getElementById("message").innerHTML=username+"   login unsuccessfull username or password is incorrect"
+    }
+    
+    }
+  )
+  </script>
+  </form>
+</body>
+</html>
