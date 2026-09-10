@@ -1,0 +1,123 @@
+<!DOCTYPE html>   //chatgpt
+<html>
+
+<head>
+    <title>Student Registration Form</title>
+</head>
+
+<body>
+
+    <h2>Student Registration Form</h2>
+
+    <form id="studentForm">
+
+        <table>
+
+            <tr>
+                <td><label for="name">Full Name:</label></td>
+                <td><input type="text" id="name"></td>
+            </tr>
+
+            <tr>
+                <td><label for="email">Email:</label></td>
+                <td><input type="email" id="email"></td>
+            </tr>
+
+            <tr>
+                <td><label for="password">Password:</label></td>
+                <td><input type="password" id="password"></td>
+            </tr>
+
+            <tr>
+                <td><label>Gender:</label></td>
+                <td>
+                    <input type="radio" name="gender" value="Male"> Male
+                    <input type="radio" name="gender" value="Female"> Female
+                </td>
+            </tr>
+
+            <tr>
+                <td><label>Skills:</label></td>
+                <td>
+                    <input type="checkbox" name="skills" value="Java"> Java
+                    <input type="checkbox" name="skills" value="Python"> Python
+                    <input type="checkbox" name="skills" value="C"> C
+                </td>
+            </tr>
+
+            <tr>
+                <td><label for="course">Choose Course:</label></td>
+                <td>
+                    <select id="course">
+                        <option value="Java">Java</option>
+                        <option value="Python">Python</option>
+                        <option value="C">C</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td><label for="address">Address:</label></td>
+                <td>
+                    <textarea id="address" rows="4" cols="25"></textarea>
+                </td>
+            </tr>
+
+            <tr>
+                <td></td>
+                <td>
+                    <button type="submit">Register</button>
+                    <button type="reset">Clear</button>
+                </td>
+            </tr>
+
+        </table>
+
+    </form>
+
+
+    <script>
+
+        document.getElementById("studentForm").addEventListener("submit", function(event) {
+
+            event.preventDefault();
+
+            let name = document.getElementById("name").value;
+            let email = document.getElementById("email").value;
+            let password = document.getElementById("password").value;
+            let course = document.getElementById("course").value;
+            let address = document.getElementById("address").value;
+
+            let gender = document.querySelector(
+                'input[name="gender"]:checked'
+            );
+
+            let skills = document.querySelectorAll(
+                'input[name="skills"]:checked'
+            );
+
+            console.log("Student Registration Details");
+            console.log("Full Name:", name);
+            console.log("Email:", email);
+            console.log("Password:", password);
+
+            if (gender) {
+                console.log("Gender:", gender.value);
+            }
+
+            console.log("Skills:");
+
+            skills.forEach(function(skill) {
+                console.log(skill.value);
+            });
+
+            console.log("Course:", course);
+            console.log("Address:", address);
+
+        });
+
+    </script>
+
+</body>
+
+</html>
