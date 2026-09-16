@@ -1,0 +1,183 @@
+<!DOCTYPE html>   
+<html>
+<head>
+    <title>Registration Form</title>
+</head>
+
+<body>
+
+<h2>Registration Form</h2>
+
+<form id="myForm">
+
+    Full Name:
+    <input type="text" id="fullname">
+    <br><br>
+
+    User Name:
+    <input type="text" id="username">
+    <br><br>
+
+    Phone No:
+    <select id="code">
+        <option value="">Code</option>
+        <option value="+91">India (+91)</option>
+        <option value="+1">USA (+1)</option>
+        <option value="+44">UK (+44)</option>
+        <option value="+61">Australia (+61)</option>
+        <option value="+81">Japan (+81)</option>
+    </select>
+
+    <input type="tel" id="phone" placeholder="Phone Number">
+    <br><br>
+
+    Email:
+    <input type="email" id="email">
+    <br><br>
+
+    Password:
+    <input type="password" id="password">
+    <br><br>
+
+    Confirm Password:
+    <input type="password" id="confirmPassword">
+    <br><br>
+
+    DOB:
+    <input type="date" id="dob">
+    <br><br>
+
+    Gender:
+    <input type="radio" name="gender" value="Male"> Male
+    <input type="radio" name="gender" value="Female"> Female
+    <br><br>
+
+    Hobbies:
+    <input type="checkbox" name="hobby" value="Reading"> Reading
+    <input type="checkbox" name="hobby" value="Music"> Music
+    <input type="checkbox" name="hobby" value="Sports"> Sports
+    <input type="checkbox" name="hobby" value="Coding"> Coding
+    <br><br>
+
+    Address:
+    <br><br>
+
+    City:
+    <input type="text" id="city">
+    <br><br>
+
+    State:
+    <select id="state">
+        <option value="">Select State</option>
+        <option>Telangana</option>
+        <option>Andhra Pradesh</option>
+        <option>Karnataka</option>
+        <option>Tamil Nadu</option>
+        <option>Kerala</option>
+        <option>Maharashtra</option>
+        <option>Delhi</option>
+    </select>
+    <br><br>
+
+    Country:
+    <select id="country">
+        <option value="">Select Country</option>
+        <option>India</option>
+        <option>USA</option>
+        <option>UK</option>
+        <option>Australia</option>
+        <option>Canada</option>
+        <option>Japan</option>
+    </select>
+    <br><br>
+
+    Upload Profile Picture:
+    <input type="file" id="profilePic">
+    <br><br>
+
+    <input type="checkbox" id="terms">
+    I agree to the Terms and Conditions
+    <br><br>
+
+    <button type="submit">Submit</button>
+    <button type="reset">Reset</button>
+
+</form>
+
+
+<script>
+
+document.getElementById("myForm").addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    console.log("Full Name:",
+        document.getElementById("fullname").value);
+
+    console.log("User Name:",
+        document.getElementById("username").value);
+
+    console.log("Phone Code:",
+        document.getElementById("code").value);
+
+    console.log("Phone No:",
+        document.getElementById("phone").value);
+
+    console.log("Email:",
+        document.getElementById("email").value);
+
+    console.log("Password:",
+        document.getElementById("password").value);
+
+    console.log("Confirm Password:",
+        document.getElementById("confirmPassword").value);
+
+    console.log("DOB:",
+        document.getElementById("dob").value);
+
+    let gender = document.querySelector(
+        'input[name="gender"]:checked'
+    );
+
+    console.log("Gender:",
+        gender ? gender.value : "");
+
+
+    let hobbies = document.querySelectorAll(
+        'input[name="hobby"]:checked'
+    );
+
+    let hobbyList = [];
+
+    hobbies.forEach(function(hobby) {
+        hobbyList.push(hobby.value);
+    });
+
+    console.log("Hobbies:", hobbyList);
+
+
+    console.log("City:",
+        document.getElementById("city").value);
+
+    console.log("State:",
+        document.getElementById("state").value);
+
+    console.log("Country:",
+        document.getElementById("country").value);
+
+
+    let file = document.getElementById("profilePic").files[0];
+
+    console.log("Profile Picture:",
+        file ? file.name : "No file selected");
+
+
+    console.log("Terms Accepted:",
+        document.getElementById("terms").checked);
+
+});
+
+</script>
+
+</body>
+</html>

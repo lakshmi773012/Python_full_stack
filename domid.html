@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Document</title>
+</head>
+<body>
+    <h2 id="title">Dom  manipulation </h2>
+    <p id="count"> 0</p>
+    <button id="button1">increment</button>
+      <button id="button2">decrement</button>
+    <script>
+       Count=document.getElementById("count");
+       Button1=document.getElementById("button1");
+       Button1.addEventListener("click",
+               function(){
+        Count.textContent= Number(Count.textContent)+1
+               }
+        )  
+                Button2=document.getElementById("button2");
+        Button2.addEventListener("click",
+               function(){
+                     Count.textContent= Number(Count.textContent)-1
+               }
+              ) 
+       </script>
+       </body>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Registration Form</title>
+    <title>Login Form</title>
 </head>
 
 <body>
@@ -15,10 +15,16 @@
     <input type="password" id="password" name="password" required>
     <br><br>
     <input type="submit" value="login">
-  
+    <button type="button" onclick="resetForm()">Reset</button>
  
-    
+</form>
+<script> 
+    function resetForm() 
+    {
+        document.getElementById("loginform").reset();
+    }
 
-  </form>
+   </script>
 </body>
 </html>
+

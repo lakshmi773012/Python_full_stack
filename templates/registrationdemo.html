@@ -23,9 +23,18 @@
     <br><br>
 
    <input type="submit" value="Register">
-   <input type="reset" value="Reset" >
-
+  <button type="button" onclick="resetForm()">Reset</button>
    </form>
+   <script> 
+    function resetForm() 
+    {
+        document.getElementById("myForm").reset();
+    }
+
+   </script>
+   
+
+   
 
 </body>
 </html>
