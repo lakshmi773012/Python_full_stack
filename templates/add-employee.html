@@ -1,107 +1,370 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Add Employee</title>
 
     <style>
+
+        /* RESET */
+
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
 
+        /* BODY */
+
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
         }
 
+        /* LIGHT MODE */
+
+        body.light {
+            background-color: #f5f5f5;
+            color: #222;
+        }
+
+        body.light .container {
+            background-color: white;
+            color: #222;
+        }
+
+        body.light h1 {
+            color: #222;
+        }
+
+        body.light input,
+        body.light select,
+        body.light textarea {
+            background-color: white;
+            color: #222;
+            border: 1px solid #ccc;
+        }
+
+        /* DARK MODE */
+
+        body.dark {
+            background-color: #121212;
+            color: white;
+        }
+
+        body.dark .container {
+            background-color: #1e1e1e;
+            color: white;
+            box-shadow: 0 2px 10px rgba(255, 255, 255, 0.08);
+        }
+
+        body.dark h1 {
+            color: white;
+        }
+
+        body.dark label {
+            color: white;
+        }
+
+        body.dark input,
+        body.dark select,
+        body.dark textarea {
+            background-color: #2b2b2b;
+            color: white;
+            border: 1px solid #555;
+        }
+
+        body.dark input::placeholder,
+        body.dark textarea::placeholder {
+            color: #aaa;
+        }
+
+        body.dark option {
+            background-color: #2b2b2b;
+            color: white;
+        }
+
+        /* NAVBAR */
+
+        .navbar {
+            background-color: #222;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        /* LOGO */
+
+        .logo {
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            margin-right: auto;
+        }
+
+        /* THEME BUTTONS */
+
+        .theme-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-right: 5px;
+        }
+
+        .theme-buttons a {
+            color: white;
+            text-decoration: none;
+            border: 1px solid #00bcd4;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .theme-buttons a:hover {
+            background-color: #00bcd4;
+            color: white;
+        }
+
+        /* NAVIGATION */
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            list-style: none;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #00bcd4;
+        }
+
+        /* FORM CONTAINER */
+
         .container {
-            max-width: 1000px;
+            width: 700px;
+            max-width: 90%;
             margin: 40px auto;
             padding: 30px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, color 0.3s;
         }
+
+        /* HEADING */
 
         h1 {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
-        .row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
+        /* LABEL */
 
         .form-group {
-            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
         }
 
-        label {
-            display: block;
-            margin-bottom: 7px;
-            font-weight: 500;
+        .form-group label {
+            width: 160px;
+            margin: 0;
+            font-weight: bold;
         }
 
-        input,
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+        /* INPUT / SELECT / TEXTAREA */
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
             font-size: 15px;
-        }
-
-        input:focus,
-        select:focus {
             outline: none;
-            border-color: #007bff;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
         }
 
-        .buttons {
-            text-align: center;
-            margin-top: 10px;
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #00bcd4;
         }
 
-        .add-btn,
-        .reset-btn {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+        /* TEXTAREA */
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
         }
+
+        /* ADD BUTTON */
 
         .add-btn {
-            background-color: #28a745;
+            width: 100%;
+            margin-top: 25px;
+            padding: 12px;
+            border: none;
+            background-color: #00bcd4;
             color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
         }
+
+        .add-btn:hover {
+            background-color: #0097a7;
+        }
+
+        /* RESET BUTTON */
 
         .reset-btn {
-            background-color: #6c757d;
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+            border: none;
+            background-color: #777;
             color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
         }
 
-        .address {
-            margin-top: 5px;
+        .reset-btn:hover {
+            background-color: #555;
         }
 
-        @media (max-width: 700px) {
-            .row {
-                grid-template-columns: 1fr;
+        /* MOBILE RESPONSIVE */
+
+        @media (max-width: 900px) {
+
+            .navbar {
+                flex-direction: column;
+                justify-content: center;
+                text-align: center;
             }
+
+            .logo {
+                margin-right: 0;
+            }
+
+            .theme-buttons {
+                margin-right: 0;
+            }
+
+            .nav-links {
+                justify-content: center;
+            }
+
+        }
+
+        @media (max-width: 600px) {
 
             .container {
-                margin: 20px;
+                width: 95%;
+                max-width: 95%;
+                margin: 25px auto;
                 padding: 20px;
             }
+
+            .nav-links {
+                gap: 10px;
+            }
+
+            .nav-links a {
+                font-size: 14px;
+            }
+
+            .theme-buttons a {
+                font-size: 13px;
+                padding: 7px 10px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+
+            .form-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .form-group label {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
         }
+
     </style>
+
 </head>
 
-<body>
+<!-- BODY -->
+
+<body class="{{ theme }}">
+
+    <!-- NAVBAR -->
+
+    <nav class="navbar">
+
+        <!-- LOGO -->
+
+        <div class="logo">Employee Management System</div>
+
+        <!-- THEME BUTTONS -->
+
+        <div class="theme-buttons">
+
+            <a href="/set-theme/light">☀ Light</a>
+
+            <a href="/set-theme/dark">🌙 Dark</a>
+
+        </div>
+
+        <!-- NAVIGATION -->
+
+        <ul class="nav-links">
+
+            <!-- HOME -->
+
+            <li><a href="/">Home</a></li>
+
+            <!-- EMPLOYEES -->
+
+            <li><a href="/employees">Employees</a></li>
+
+            <!-- ADD EMPLOYEE -->
+
+            <li><a href="/add-employee">Add Employee</a></li>
+
+            <!-- SEARCH -->
+
+            <li><a href="/search">Search</a></li>
+
+        </ul>
+
+    </nav>
+
+    <!-- ADD EMPLOYEE FORM -->
 
     <div class="container">
 
@@ -109,80 +372,103 @@
 
         <form action="/add-employee" method="POST">
 
-            <!-- Name and Email -->
-            <div class="row">
+            <!-- EMPLOYEE NAME -->
 
-                <div class="form-group">
-                    <label for="name">Employee Name</label>
-                    <input type="text" id="name" name="name" placeholder="Enter employee name" required>
-                </div>
+            <div class="form-group">
 
-                <div class="form-group">
-                    <label for="email">Employee Email</label>
-                    <input type="email" id="email" name="email" placeholder="Enter employee email" required>
-                </div>
+                <label for="name">Employee Name</label>
+
+                <input type="text" id="name" name="name" placeholder="Enter employee name" required>
 
             </div>
 
-            <!-- Phone and Department -->
-            <div class="row">
+            <!-- EMAIL -->
 
-                <div class="form-group">
-                    <label for="phone">Employee Phone</label>
-                    <input type="tel" id="phone" name="phone" placeholder="Enter employee phone" required>
-                </div>
+            <div class="form-group">
 
-                <div class="form-group">
-                    <label for="department">Employee Department</label>
-                    <select id="department" name="department" required>
-                        <option value="">Select Department</option>
-                        <option value="HR">HR</option>
-                        <option value="IT">IT</option>
-                        <option value="Finance">Finance</option>
-                        <option value="Marketing">Marketing</option>
-                        <option value="Sales">Sales</option>
-                    </select>
-                </div>
+                <label for="email">Email</label>
+
+                <input type="email" id="email" name="email" placeholder="Enter email" required>
 
             </div>
 
-            <!-- Salary and Join Date -->
-            <div class="row">
+            <!-- PHONE -->
 
-                <div class="form-group">
-                    <label for="salary">Employee Salary</label>
-                    <input type="number" id="salary" name="salary" placeholder="Enter employee salary" required>
-                </div>
+            <div class="form-group">
 
-                <div class="form-group">
-                    <label for="join_date">Employee Join Date</label>
-                    <input type="date" id="join_date" name="join_date" required>
-                </div>
+                <label for="phone">Phone</label>
+
+                <input type="tel" id="phone" name="phone" placeholder="Enter phone number" required>
 
             </div>
 
-            <!-- Address -->
-            <div class="form-group address">
-                <label for="address">Employee Address</label>
-                <input type="text" id="address" name="address" placeholder="Enter employee address" required>
+            <!-- DEPARTMENT -->
+
+            <div class="form-group">
+
+                <label for="department">Department</label>
+
+                <select id="department" name="department" required>
+
+                    <option value="">Select Department</option>
+
+                    <option value="HR">HR</option>
+
+                    <option value="IT">IT</option>
+
+                    <option value="Finance">Finance</option>
+
+                    <option value="Marketing">Marketing</option>
+
+                    <option value="Sales">Sales</option>
+
+                </select>
+
             </div>
 
-            <!-- Buttons -->
-            <div class="buttons">
+            <!-- SALARY -->
 
-                <button type="submit" class="add-btn">
-                    Add Employee
-                </button>
+            <div class="form-group">
 
-                <button type="reset" class="reset-btn">
-                    Reset
-                </button>
+                <label for="salary">Salary</label>
+
+                <input type="number" id="salary" name="salary" placeholder="Enter salary" min="0" required>
 
             </div>
+
+            <!-- JOINING DATE -->
+
+            <div class="form-group">
+
+                <label for="join_date">Joining Date</label>
+
+                <input type="date" id="join_date" name="join_date" required>
+
+            </div>
+
+            <!-- ADDRESS -->
+
+            <div class="form-group">
+
+                <label for="address">Address</label>
+
+                <textarea id="address" name="address" placeholder="Enter employee address"></textarea>
+
+            </div>
+
+            <!-- ADD EMPLOYEE BUTTON -->
+
+            <button type="submit" class="add-btn">Add Employee</button>
+
+            <!-- RESET BUTTON -->
+
+            <button type="reset" class="reset-btn">Reset</button>
 
         </form>
 
     </div>
 
 </body>
+
 </html>
+
