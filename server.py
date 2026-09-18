@@ -1,12 +1,31 @@
-from flask import Flask, request, redirect, render_template
+from flask import Flask, request, redirect, render_template, make_response, session
 import sqlite3
+
+from werkzeug.security import generate_password_hash, check_password_hash
+
+
+
+# FLASK APPLICATION
 
 app = Flask(__name__)
 
 
-# -----------------------------------
-# Create Database and Table
-# -----------------------------------
+app.secret_key = "employee-management-secret-key"
+
+
+
+# DATABASE CONNECTION
+
+def get_database_connection():
+
+    connection = sqlite3.connect("users.db")
+
+    connection.row_factory = sqlite3.Row
+
+    return connection
+
+
+# CREATE DATABASE
 
 def create_database():
 
@@ -14,6 +33,8 @@ def create_database():
 
     cursor = connection.cursor()
 
+    # USERS TABLE
+    
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,146 +44,7 @@ def create_database():
         )
     """)
 
-    connection.commit()
-
-    connection.close()
-
-
-# -----------------------------------
-# Home Page
-# -----------------------------------
-
-@app.route("/")
-def home():
-
-    return render_template("navbar.html")
-
-
-# -----------------------------------
-# Registration Page
-# -----------------------------------
-
-@app.route("/register", methods=["GET"])
-def register_page():
-
-    return render_template("registrationdemo.html")
-
-
-# -----------------------------------
-# Registration Path
-# -----------------------------------
-
-@app.route("/register", methods=["POST"])
-def register():
-
-    fullname = request.form["fullname"]
-    username = request.form["username"]
-    password = request.form["password"]
-
-    connection = sqlite3.connect("users.db")
-
-    cursor = connection.cursor()
-
-    try:
-
-        cursor.execute("""
-            INSERT INTO users (fullname, username, password)
-            VALUES (?, ?, ?)
-        """, (fullname, username, password))
-
-        connection.commit()
-
-    except sqlite3.IntegrityError:
-
-        connection.close()
-
-        return """
-        <h2>Username already exists!</h2>
-        <a href="/register">Try Again</a>
-        """
-
-    connection.close()
-
-    return redirect("/login")
-
-
-# -----------------------------------
-# Login Page
-# -----------------------------------
-
-@app.route("/login", methods=["GET"])
-def login_page():
-
-    return render_template("login.html")
-
-
-# -----------------------------------
-# Login Path
-# -----------------------------------
-
-@app.route("/login", methods=["POST"])
-def login():
-
-    username = request.form["username"]
-    password = request.form["password"]
-
-    connection = sqlite3.connect("users.db")
-
-    cursor = connection.cursor()
-
-    cursor.execute("""
-        SELECT * FROM users
-        WHERE username = ? AND password = ?
-    """, (username, password))
-
-    user = cursor.fetchone()
-
-    connection.close()
-
-    if user:
-
-        return """
-        <h2>Login successful!</h2>
-        <p>Welcome, """ + username + """!</p>
-        <a href="/">Go to Home</a>
-        """
-
-    else:
-
-        return """
-        <h2>Login failed!</h2>
-        <p>Username or password is incorrect.</p>
-        <a href="/login">Try Again</a>
-        """
-
-# -----------------------------------
-# Add Employee Page
-# -----------------------------------
-
-@app.route("/add-employee", methods=["GET"])
-def add_employee_page():
-
-    return render_template("add-employee.html")
-
-
-# -----------------------------------
-# Add Employee Path
-# -----------------------------------
-
-@app.route("/add-employee", methods=["POST"])
-def add_employee():
-
-    name = request.form["name"]
-    email = request.form["email"]
-    phone = request.form["phone"]
-    department = request.form["department"]
-    salary = request.form["salary"]
-    join_date = request.form["join_date"]
-    address = request.form["address"]
-
-    connection = sqlite3.connect("users.db")
-
-    cursor = connection.cursor()
+    # EMPLOYEES TABLE
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS employees (
@@ -171,17 +53,444 @@ def add_employee():
             email TEXT NOT NULL,
             phone TEXT NOT NULL,
             department TEXT NOT NULL,
-            salary TEXT NOT NULL,
+            salary INTEGER NOT NULL,
             join_date TEXT NOT NULL,
-            address TEXT NOT NULL
+            address TEXT
         )
     """)
 
+    connection.commit()
+
+    connection.close()
+
+    print("=================================")
+    print("Database ready")
+    print("=================================")
+
+
+# LOGIN CHECK
+
+def login_required():
+
+    return "user_id" in session
+
+
+# THEME
+
+@app.route("/set-theme/<theme>")
+def set_theme(theme):
+
+    if theme not in ["light", "dark"]:
+        theme = "light"
+
+    previous_page = request.referrer or "/"
+
+    response = make_response(
+        redirect(previous_page)
+    )
+
+    response.set_cookie(
+        "theme",
+        theme,
+        max_age=60 * 60 * 24 * 365
+    )
+
+    return response
+
+
+# HOME PAGE
+
+@app.route("/")
+def home():
+
+    # User must login first
+
+    if not login_required():
+        return redirect("/login")
+
+    theme = request.cookies.get(
+        "theme",
+        "light"
+    )
+
+    username = session.get("username")
+
+    fullname = session.get("fullname")
+
+    return render_template(
+        "navbar.html",
+        theme=theme,
+        username=username,
+        fullname=fullname
+    )
+
+
+
+# REGISTER get
+
+@app.route("/register", methods=["GET"])
+def register_page():
+
+    theme = request.cookies.get(
+        "theme",
+        "light"
+    )
+
+    return render_template(
+        "registrationdemo.html",
+        theme=theme
+    )
+
+
+# REGISTER post
+
+@app.route("/register", methods=["POST"])
+def register():
+
+    fullname = request.form.get("fullname", "").strip()
+
+    username = request.form.get("username", "").strip()
+
+    password = request.form.get("password", "")
+
+
+    # VALIDATION
+    
+
+    if not fullname:
+
+        return render_template(
+            "registrationdemo.html",
+            theme=request.cookies.get(
+                "theme",
+                "light"
+            ),
+            error="Full name is required."
+        )
+
+    if not username:
+
+        return render_template(
+            "registrationdemo.html",
+            theme=request.cookies.get(
+                "theme",
+                "light"
+            ),
+            error="Username is required."
+        )
+
+    if not password:
+
+        return render_template(
+            "registrationdemo.html",
+            theme=request.cookies.get(
+                "theme",
+                "light"
+            ),
+            error="Password is required."
+        )
+
+    
+    # HASH PASSWORD
+    
+
+    hashed_password = generate_password_hash(
+        password
+    )
+
+    
+    # INSERT USER
+    
+
+    connection = get_database_connection()
+
+    cursor = connection.cursor()
+
+    try:
+
+        cursor.execute("""
+            INSERT INTO users
+            (
+                fullname,
+                username,
+                password
+            )
+            VALUES (?, ?, ?)
+        """,
+        (
+            fullname,
+            username,
+            hashed_password
+        ))
+
+        connection.commit()
+
+    except sqlite3.IntegrityError:
+
+        connection.close()
+
+        return render_template(
+            "registrationdemo.html",
+            theme=request.cookies.get(
+                "theme",
+                "light"
+            ),
+            error="Username already exists."
+        )
+
+    connection.close()
+
+    # Go to login page
+
+    return redirect("/login")
+
+
+# LOGIN get
+
+@app.route("/login", methods=["GET"])
+def login_page():
+
+    # If already logged in,
+    # go directly to home
+
+    if "user_id" in session:
+
+        return redirect("/")
+
+    theme = request.cookies.get(
+        "theme",
+        "light"
+    )
+
+    return render_template(
+        "login.html",
+        theme=theme
+    )
+
+
+
+# LOGIN post
+
+@app.route("/login", methods=["POST"])
+def login():
+
+    
+    # GET FORM VALUES
+    
+
+    username = request.form.get("username", "").strip()
+
+    password = request.form.get(
+        "password",
+        ""
+    )
+
+    print("=================================")
+    print("LOGIN ATTEMPT")
+    print("Username:", username)
+    print("=================================")
+
+    # VALIDATION
+    
+
+    if not username or not password:
+
+        return render_template(
+            "login.html",
+            theme=request.cookies.get(
+                "theme",
+                "light"
+            ),
+            error="Username and password are required."
+        )
+
+    # FIND USER
+
+    connection = get_database_connection()
+
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT
+            id,
+            fullname,
+            username,
+            password
+        FROM users
+        WHERE username = ?
+    """,
+    (
+        username,
+    ))
+
+    user = cursor.fetchone()
+
+    connection.close()
+
+    
+    # USER NOT FOUND
+    
+
+    if user is None:
+
+        print("User not found")
+
+        return render_template(
+            "login.html",
+            theme=request.cookies.get(
+                "theme",
+                "light"
+            ),
+            error="Username or password is incorrect."
+        )
+
+    
+    # CHECK PASSWORD
+    
+
+    password_correct = check_password_hash(
+        user["password"],
+        password
+    )
+
+    if not password_correct:
+
+        print("Incorrect password")
+
+        return render_template(
+            "login.html",
+            theme=request.cookies.get(
+                "theme",
+                "light"
+            ),
+            error="Username or password is incorrect."
+        )
+
+    # LOGIN SUCCESS
+
+    print("Login successful!")
+    print("User ID:", user["id"])
+    print("Username:", user["username"])
+
+    # Clear old session
+
+    session.clear()
+
+    # Store current user
+
+    session["user_id"] = user["id"]
+
+    session["username"] = user["username"]
+
+    session["fullname"] = user["fullname"]
+
+    # REDIRECT TO HOME
+    
+
+    return redirect("/")
+
+
+# LOGOUT
+
+
+@app.route("/logout")
+def logout():
+
+    session.clear()
+
+    return redirect("/login")
+
+
+
+# ADD EMPLOYEE get
+
+
+@app.route("/add-employee", methods=["GET"])
+def add_employee_page():
+
+    if not login_required():
+
+        return redirect("/login")
+
+    theme = request.cookies.get(
+        "theme",
+        "light"
+    )
+
+    return render_template(
+        "add-employee.html",
+        theme=theme
+    )
+
+
+
+# ADD EMPLOYEE post
+
+@app.route("/add-employee", methods=["POST"])
+def add_employee():
+
+    if not login_required():
+
+        return redirect("/login")
+
+    name = request.form.get("name", "").strip()
+
+    email = request.form.get("email", "").strip()
+
+    phone = request.form.get("phone", "").strip()
+
+    department = request.form.get("department", "").strip()
+
+    salary = request.form.get("salary", "").strip()
+
+    join_date = request.form.get("join_date", "").strip()
+
+    address = request.form.get("address", "").strip()
+
+    if not name:
+        return "Name is required!"
+
+    if not email:
+        return "Email is required!"
+
+    if not phone:
+        return "Phone is required!"
+
+    if not department:
+        return "Department is required!"
+
+    if not salary:
+        return "Salary is required!"
+
+    if not join_date:
+        return "Join date is required!"
+
+    try:
+
+        salary = int(salary)
+
+    except ValueError:
+
+        return "Salary must be a number!"
+
+    connection = get_database_connection()
+
+    cursor = connection.cursor()
+
     cursor.execute("""
         INSERT INTO employees
-        (name, email, phone, department, salary, join_date, address)
+        (
+            name,
+            email,
+            phone,
+            department,
+            salary,
+            join_date,
+            address
+        )
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (
+    """,
+    (
         name,
         email,
         phone,
@@ -195,35 +504,24 @@ def add_employee():
 
     connection.close()
 
-    # After adding employee
-    # go to Employees page
-
     return redirect("/employees")
 
 
-# -----------------------------------
-# Employees Page
-# -----------------------------------
+# EMPLOYEES
 
 @app.route("/employees")
 def employees():
 
-    connection = sqlite3.connect("users.db")
+    if not login_required():
 
-    connection.row_factory = sqlite3.Row
+        return redirect("/login")
+
+    connection = get_database_connection()
 
     cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT
-            id,
-            name,
-            email,
-            phone,
-            department,
-            salary,
-            join_date,
-            address
+        SELECT *
         FROM employees
         ORDER BY id DESC
     """)
@@ -232,90 +530,135 @@ def employees():
 
     connection.close()
 
+    theme = request.cookies.get(
+        "theme",
+        "light"
+    )
+
     return render_template(
         "employees.html",
-        employees=employees
+        employees=employees,
+        theme=theme
     )
 
 
-# -----------------------------------
-# Edit Employee
-# -----------------------------------
 
-@app.route("/edit-employee/<int:id>", methods=["GET", "POST"])
-def edit_employee(id):
+# SEARCH
 
-    connection = sqlite3.connect("users.db")
+@app.route("/search")
+def search():
 
-    connection.row_factory = sqlite3.Row
+    if not login_required():
+
+        return redirect("/login")
+
+    search_text = request.args.get("q", "").strip()
+
+    connection = get_database_connection()
 
     cursor = connection.cursor()
 
-    # -----------------------------------
-    # Update Employee
-    # -----------------------------------
+    if search_text:
 
-    if request.method == "POST":
-
-        name = request.form["name"]
-        email = request.form["email"]
-        phone = request.form["phone"]
-        department = request.form["department"]
-        salary = request.form["salary"]
-        join_date = request.form["join_date"]
-        address = request.form["address"]
+        search_value = f"%{search_text}%"
 
         cursor.execute("""
-            UPDATE employees
-            SET
-                name = ?,
-                email = ?,
-                phone = ?,
-                department = ?,
-                salary = ?,
-                join_date = ?,
-                address = ?
-            WHERE id = ?
-        """, (
-            name,
-            email,
-            phone,
-            department,
-            salary,
-            join_date,
-            address,
-            id
+            SELECT *
+            FROM employees
+            WHERE
+                name LIKE ?
+                OR email LIKE ?
+                OR phone LIKE ?
+                OR department LIKE ?
+            ORDER BY id DESC
+        """,
+        (
+            search_value,
+            search_value,
+            search_value,
+            search_value
         ))
 
-        connection.commit()
+    else:
 
-        connection.close()
+        cursor.execute("""
+            SELECT *
+            FROM employees
+            ORDER BY id DESC
+        """)
 
-        return redirect("/employees")
+    employees = cursor.fetchall()
+
+    connection.close()
+
+    theme = request.cookies.get(
+        "theme",
+        "light"
+    )
+
+    return render_template(
+        "search.html",
+        employees=employees,
+        theme=theme,
+        search_text=search_text
+    )
 
 
-    # -----------------------------------
-    # Get Employee Details
-    # -----------------------------------
+
+# DELETE EMPLOYEE
+
+@app.route("/delete-employee/<int:id>")
+def delete_employee(id):
+
+    if not login_required():
+
+        return redirect("/login")
+
+    connection = get_database_connection()
+
+    cursor = connection.cursor()
 
     cursor.execute("""
-        SELECT
-            id,
-            name,
-            email,
-            phone,
-            department,
-            salary,
-            join_date,
-            address
+        DELETE FROM employees
+        WHERE id = ?
+    """,
+    (
+        id,
+    ))
+
+    connection.commit()
+
+    connection.close()
+
+    return redirect("/employees")
+
+
+
+# EDIT EMPLOYEE PAGE
+
+@app.route("/edit-employee/<int:id>")
+def edit_employee_page(id):
+
+    if not login_required():
+
+        return redirect("/login")
+
+    connection = get_database_connection()
+
+    cursor = connection.cursor()
+
+    cursor.execute("""
+        SELECT *
         FROM employees
         WHERE id = ?
-    """, (id,))
+    """,
+    (
+        id,
+    ))
 
     employee = cursor.fetchone()
 
     connection.close()
-
 
     if employee is None:
 
@@ -325,30 +668,98 @@ def edit_employee(id):
         <a href="/employees">
             Back to Employees
         </a>
-        """, 404
+        """
 
+    theme = request.cookies.get(
+        "theme",
+        "light"
+    )
 
     return render_template(
         "edit-employee.html",
-        employee=employee
+        employee=employee,
+        theme=theme
     )
 
 
-# -----------------------------------
-# Delete Employee
-# -----------------------------------
+# EDIT EMPLOYEE
 
-@app.route("/delete-employee/<int:id>")
-def delete_employee(id):
+@app.route(
+    "/edit-employee/<int:id>",
+    methods=["POST"]
+)
+def edit_employee(id):
 
-    connection = sqlite3.connect("users.db")
+    if not login_required():
+
+        return redirect("/login")
+
+    name = request.form.get("name", "").strip()
+
+    email = request.form.get("email", "").strip()
+
+    phone = request.form.get("phone", "").strip()
+
+    department = request.form.get("department", "").strip()
+
+    salary = request.form.get("salary", "").strip()
+
+    join_date = request.form.get("join_date", "").strip()
+
+    address = request.form.get("address", "").strip()
+
+    if not name:
+        return "Name is required!"
+
+    if not email:
+        return "Email is required!"
+
+    if not phone:
+        return "Phone is required!"
+
+    if not department:
+        return "Department is required!"
+
+    if not salary:
+        return "Salary is required!"
+
+    if not join_date:
+        return "Join date is required!"
+
+    try:
+
+        salary = int(salary)
+
+    except ValueError:
+
+        return "Salary must be a number!"
+
+    connection = get_database_connection()
 
     cursor = connection.cursor()
 
     cursor.execute("""
-        DELETE FROM employees
+        UPDATE employees
+        SET
+            name = ?,
+            email = ?,
+            phone = ?,
+            department = ?,
+            salary = ?,
+            join_date = ?,
+            address = ?
         WHERE id = ?
-    """, (id,))
+    """,
+    (
+        name,
+        email,
+        phone,
+        department,
+        salary,
+        join_date,
+        address,
+        id
+    ))
 
     connection.commit()
 
@@ -357,12 +768,14 @@ def delete_employee(id):
     return redirect("/employees")
 
 
-# -----------------------------------
-# Start Server
-# -----------------------------------
+
+# START APPLICATION
+
 
 if __name__ == "__main__":
 
     create_database()
 
-    app.run(debug=True)
+    app.run(
+        debug=True
+    )
