@@ -14,6 +14,8 @@ def weather(request):
 
 
     api_key = '55499e21527e64b1003e1adbc992736d'
+        url = 'https://api.openweathermap.org/data/2.5/weather'
+
 
     params = {
         'q': city,
