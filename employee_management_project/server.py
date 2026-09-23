@@ -770,7 +770,7 @@ def edit_employee(id):
 
 
 # START APPLICATION
-
+create_database()
 
 if __name__ == "__main__":
 
