@@ -1,4 +1,5 @@
 import requests
+import os
 from django.shortcuts import render
 from .models import WeatherData
 
@@ -12,7 +13,7 @@ def weather(request):
             'error': 'Please enter a city'
         })
 
-    api_key = 'your-api-key'
+    api_key = os.environ.get('OPENWEATHER_API_KEY')
 
     url = 'https://api.openweathermap.org/data/2.5/weather'
 
